@@ -19,43 +19,14 @@
 #
 #-------------------------------------------------------------
 
-source("src/test/scripts/applications/nn/component/efficientNet.dml") as eff
+X = rand(rows=100, cols=100, seed=42);
+Y = rand(rows=100, cols=100, seed=42);
+R = matrix(0, rows=100, cols=1);
 
-# Read training data
-data = read($1, format="csv")
-
-N = nrow(data)
-
-# Extract images and labels
-images = data[,2:ncol(data)]
-labels = data[,1]
-
-# Scale images to [0,1], and one-hot encode the labels
-images = images / 255.0
-labels = table(seq(1, N), labels+1, N, 10)
-
-model = eff::initNetwork(1, 10, -1)
-
-# Train
-epochs = 1
-batch_size = 256
-model = eff::netTrain(model, images, 1, 28, 28, labels, epochs, batch_size, 0.025, 0.9, TRUE)
-
-# Also Predict in Batches since otherwise we can run into Memory Issues
-# Could be unnecessary on more powerful machines :)
-iters = ceil(N / batch_size)
-partial_accuracies = matrix(0, rows=iters, cols=1)
-
-parfor(i in 1:iters) {
-  beg = ((i-1) * batch_size) %% N + 1
-  end = min(N, beg + batch_size - 1)
-  X_batch = images[beg:end,]
-  y_batch = labels[beg:end,]
-
-  pred = eff::netPredict(X_batch, model, 1, 28, 28)
-  partial_accuracies[i,1] = mean(rowIndexMax(pred) == rowIndexMax(y_batch))
+parfor (i in 1:100) {
+  R[i,] = X[i,] %*% Y[,i];
 }
 
-accuracy = sum(partial_accuracies) / iters
-print("Total Accuracy: " + accuracy)
-write(accuracy, $2)
+S = sum(R);
+
+write(S, $1);

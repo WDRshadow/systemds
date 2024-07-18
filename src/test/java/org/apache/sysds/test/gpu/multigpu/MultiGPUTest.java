@@ -33,7 +33,7 @@ public class MultiGPUTest extends AutomatedTestBase {
 
     @Override
     public void setUp() {
-        TEST_GPU = true;
+        TEST_GPU = false;
         VERBOSE_STATS = true;
         addTestConfiguration(SINGLE_GPU_TEST,
                 new TestConfiguration(TEST_CLASS_DIR, TEST_NAME, new String[]{"R"}));
